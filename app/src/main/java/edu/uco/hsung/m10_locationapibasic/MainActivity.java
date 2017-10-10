@@ -77,6 +77,15 @@ public class MainActivity extends Activity implements
         mLatitudeText = (TextView) findViewById((R.id.latitude_text));
         mLongitudeText = (TextView) findViewById((R.id.longitude_text));
 
+        if (getApplicationContext().checkSelfPermission(
+                android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+
+            MainActivity.this.requestPermissions(
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSION_ACCESS_FINE_LOCATION);
+        }
+
         buildGoogleApiClient();
     }
 
@@ -117,15 +126,11 @@ public class MainActivity extends Activity implements
         // Gets the best and most recent location currently available, which may be null
         // in rare cases when a location is not available.
         Log.i(TAG, "onConnected()");
-        if (getApplicationContext().checkSelfPermission(
-                android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-
-            MainActivity.this.requestPermissions(
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSION_ACCESS_FINE_LOCATION);
+        try {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        } catch (SecurityException e) {
+            e.printStackTrace();
         }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
         if (mLastLocation != null) {
             Log.i(TAG, "mLastLoc != null" + mLastLocation.getLatitude());
